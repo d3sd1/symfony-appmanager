@@ -2,7 +2,7 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="edc36c3e-f200-42a1-8d2c-b6569625e492" name="ERP Servicios" url="http://192.168.1.144">
+      <webServer id="edc36c3e-f200-42a1-8d2c-b6569625e492" name="ERP Servicios" url="http://mobile.workout-events.com/">
         <fileTransfer host="192.168.1.144" port="22" rootFolder="/var/www/mobile" accessType="SFTP">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />

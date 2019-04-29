@@ -42,9 +42,9 @@ class ServicesController extends AbstractController
 
         /*
          * campo: id_servicio_estado --> tabla servicio_estado
-            el único valor que no nos valdría es el 5 = anulado pero dependiendo de lo que queramos mostrar si son solo los abiertos sería to do lo que sea < 3 (cerrado, facturado, anulado quedarían fuera)
-            si necesitamos tener las fechas de referencia de cuando se realiza el servicio esto se sacaría haciendo el join servicio_categoria on servicio_categoria.id_servicio = servicio.id  donde el id_persona_servicio_estado sea menor que 9 que es el anulado y en base al campo "fecha".
-
+         *   el único valor que no nos valdría es el 5 = anulado pero dependiendo de lo que queramos mostrar si son solo los abiertos sería to do lo que sea < 3 (cerrado, facturado, anulado quedarían fuera)
+         *   si necesitamos tener las fechas de referencia de cuando se realiza el servicio esto se sacaría haciendo el join servicio_categoria on servicio_categoria.id_servicio = servicio.id  donde el id_persona_servicio_estado sea menor que 9 que es el anulado y en base al campo "fecha".
+         *
             hay otras tablas relacionadas sin foreign key declarada como "id_presupuesto" o "id_cliente" que no sé serían necesarias.
          */
         $qb->setFirstResult($startIndex);
