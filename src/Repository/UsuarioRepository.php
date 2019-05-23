@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Servicio;
+use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -12,10 +14,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method Servicio[]    findAll()
  * @method Servicio[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class UsuarioRepository extends ServiceEntityRepository
+class UsuarioRepository extends EntityRepository
 {
-    public function __construct(RegistryInterface $registry)
-    {
-        parent::__construct($registry, Servicio::class);
-    }
+
 }

@@ -42,12 +42,19 @@ class LoginController extends AbstractController
                 ->andWhere('u.password = :passwd')
                 ->setParameter('username', $username)
                 ->setParameter('passwd', md5($passwd))
+                ->orderBy('fecha_inicio DESC')
                 ->getQuery()->getSingleResult();
             $loginOK = count($user) > 0;
             if (!$loginOK) {
                 $errMsg = "Credenciales inválidas.";
             } else {
                 $request->getSession()->set('woLoginMicrosite', $user['id']);
+                $dbUser = $this->getDoctrine()->getManager()->getRepository('App:Usuario')
+                    ->find(1);;
+                $dbUser->setAplicacion(true);
+                $dbUser->setActivo(true);
+                $this->getDoctrine()->getManager()->persist($dbUser);
+                $this->getDoctrine()->getManager()->flush();
                 $loggedIn = true;
             }
         } else if ($sendForm) {

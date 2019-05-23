@@ -4,6 +4,39 @@
 
 {% block body %}
     <div class="container">
+        <form class="row" style="margin-top: 20px">
+            <div class="form-group col-12 col-md-6 col-lg-3">
+                <label for="exampleFormControlSelect1">Filtrar día // TODO: poner selector de fecga por defecto hoy</label>
+                <select multiple class="form-control" id="exampleFormControlSelect2">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                </select>
+            </div>
+            <div class="form-group col-12 col-md-6 col-lg-3">
+                <label for="exampleFormControlSelect1">Filtrar delegación //TODO: poner delegaciones y por defecto poner la del usuario</label>
+                <select multiple class="form-control" id="exampleFormControlSelect2">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                </select>
+            </div>
+            <div class="form-group col-12 col-md-6 col-lg-3">
+                <label for="exampleFormControlSelect1">Filtrar departamento //TODO: poner delegaciones y por defecto poner la del usuario</label>
+                <select multiple class="form-control" id="exampleFormControlSelect2">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary mb-2 col-12 col-md-6 col-lg-3" style="background-color: #ed1c24; border-color: #ed1b24">Filtrar</button>
+        </form>
         <div class="table-wrapper">
             <div class="table-title">
                 <div class="row">
@@ -52,16 +85,33 @@
 							</span>
                             </td>
                             <td>{{ servicio['numero'] }}</td>
+                            <td>CLIENTE</td>
                             <td>{{ servicio['nombre'] }}</td>
+                            <td>DELEGACION</td>
+                            <td>DPTO</td>
+                            <td>{% if servicio.id_servicio_estado == 1 %}
+                                    Pedido
+                                {% elseif servicio.id_servicio_estado == 2 %}
+                                    Confirmado
+                                {% elseif servicio.id_servicio_estado == 3 %}
+                                    Cerrado
+                                {% elseif servicio.id_servicio_estado == 4 %}
+                                    Facturado
+                                {% elseif servicio.id_servicio_estado == 5 %}
+                                    Anulado
+                                {% else %}
+                                    Estado no identificado: {{ servicio.id_servicio_estado }}
+                                {% endif %}</td>
+                            <td>PAX</td>
+                            <td>Día 1/10</td>
                             <td>
                                 <!--<a href="#editEmployeeModal" class="edit" data-toggle="modal"><i class="material-icons"
                                                                                                  data-toggle="tooltip" title="Edit">&#xE254;</i></a>
                                 <a href="#deleteEmployeeModal" class="delete" data-toggle="modal"><i class="material-icons"
                                                                                                      data-toggle="tooltip"
                                                                                                      title="Delete">&#xE872;</i></a>-->
-                                <a href="#goToService" class="view" data-toggle="modal"><i class="material-icons"
-                                                                                           data-toggle="tooltip"
-                                                                                           title="Visualizar">pageview</i></a>
+                                <a href="service/{{ servicio.id }}" target="openService" class="view" ><i class="material-icons"
+                                                                                           data-toggle="tooltip" title="Visualizar">pageview</i></a>
                             </td>
                         </tr>
                     {% endfor %}
