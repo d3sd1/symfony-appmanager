@@ -58,6 +58,9 @@ class ServicesController extends AbstractController
         // Si solo queremos los abiertos, sin cerrados ni facturados
         //$qb->where("s.id_servicio_estado < 5");
 
+        /*
+         * Los departamentos y delegaciones se pueden sacar del campo id_departamento e id_delegacion (ty los nombres de las tablas coincidentes) en la tabla "servicio_categoria" que está relacionada a "servicio" por el "id_servicio".
+         */
         $servicios = $qb->getQuery()->getArrayResult();
         return $this->render('services/index.html.twig', [
             'servicios' => $servicios,
