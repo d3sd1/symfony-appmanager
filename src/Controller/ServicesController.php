@@ -2,16 +2,20 @@
 
 namespace App\Controller;
 
+use App\Service\UserService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ServicesController extends AbstractController
 {
     /**
-     * @Route("/", name="services")
+     * @Route("/services", name="services")
      */
-    public function index()
+    public function index(UserService $userService)
     {
+        if (!$userService->isLoggedIn()) {
+            return $this->redirectToRoute('login');
+        }
         $qb = $this->getDoctrine()->getManager()->createQueryBuilder();
         $qb->select('s');
         $qb->from('App:Servicio', 's');

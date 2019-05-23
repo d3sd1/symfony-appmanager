@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel='shortcut icon' href='{{ asset('assets/favicon.ico') }}'/>
+<link rel='shortcut icon' href='https://workout-events.com/favicon.ico'/>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
       integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -313,6 +313,7 @@
 </script>
 </head>
 <body>
+{% block menu %}
 <div class="row">
     <nav class="navbar navbar-expand-lg navbar-light bg-light col-12">
         <a class="navbar-brand" href="#">Workout Events</a>
@@ -330,6 +331,7 @@
         </div>
     </nav>
 </div>
+{% endblock %}
 {% block body %}{% endblock %}
 {% block javascripts %}{% endblock %}
 </body>
