@@ -57,10 +57,16 @@ class ServicesController extends AbstractController
 
         // Si solo queremos los abiertos, sin cerrados ni facturados
         //$qb->where("s.id_servicio_estado < 5");
-
+        $dbDelegaciones = $this->getDoctrine()->getManager()->getRepository('App:Delegacion')
+            ->findAll();
+        $dbDepartamentos = $this->getDoctrine()->getManager()->getRepository('App:Departamento')
+            ->findAll();
+        $dbEmpresas = $this->getDoctrine()->getManager()->getRepository('App:Empresa')
+            ->findAll();
         /*
          * Los departamentos y delegaciones se pueden sacar del campo id_departamento e id_delegacion (ty los nombres de las tablas coincidentes) en la tabla "servicio_categoria" que está relacionada a "servicio" por el "id_servicio".
          */
+
         $servicios = $qb->getQuery()->getArrayResult();
         return $this->render('services/index.html.twig', [
             'servicios' => $servicios,
@@ -69,6 +75,29 @@ class ServicesController extends AbstractController
             'startIndexResult' => $startIndex, // no formatear
             'endIndexResult' => $endIndex, // no formatear
             'currentPag' => $currentPag,
+            'delegaciones' => $dbDelegaciones,
+            'departamentos' => $dbDepartamentos,
+            'empresas' => $dbEmpresas,
+            'usuario' => $userService->getSessionUser(),
+        ]);
+    }
+
+    /**
+     * @Route("/service/{id}", name="service")
+     */
+    public function servicio(UserService $userService, $id)
+    {
+        if (!$userService->isLoggedIn()) {
+            return $this->redirectToRoute('login');
+        }
+
+        $servicio = $this->getDoctrine()->getManager()->createQueryBuilder()->
+        select('s')->from('App:Servicio', 's')
+            ->where('s.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()->getSingleResult();
+        return $this->render('services/single.html.twig', [
+            'servicio' => $servicio,
         ]);
     }
 }
