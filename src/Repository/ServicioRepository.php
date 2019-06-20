@@ -3,8 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Servicio;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\ORM\EntityRepository;
 
 /**
  * @method Servicio|null find($id, $lockMode = null, $lockVersion = null)
@@ -12,12 +11,8 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method Servicio[]    findAll()
  * @method Servicio[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ServicioRepository extends ServiceEntityRepository
+class ServicioRepository extends EntityRepository
 {
-    public function __construct(RegistryInterface $registry)
-    {
-        parent::__construct($registry, Servicio::class);
-    }
 
     // /**
     //  * @return Servicio[] Returns an array of Servicio objects
