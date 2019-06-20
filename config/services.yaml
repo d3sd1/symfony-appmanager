@@ -31,3 +31,8 @@ services:
         arguments:
             - "@service_container"
             - "@doctrine.orm.default_entity_manager"
+    App\Service\ServicesService:
+      public: true
+      arguments:
+        - "@service_container"
+        - "@doctrine.orm.default_entity_manager"
