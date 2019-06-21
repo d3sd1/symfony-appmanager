@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Service\ServicesService;
 use App\Service\UserService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -56,16 +55,6 @@ class ServicesController extends AbstractController
             ->setParameter('id', $id)
             ->getQuery()->getSingleResult();
 
-
-        /* Calculate day */
-        $dayInit = $servicio->getFechaInicio();
-        $dayEnd = $servicio->getFechaFin();
-        $dayStr = "Días no acordados";
-        if ($dayInit != null && $dayEnd != null) {
-            $totalDays = $dayEnd->diff($dayInit)->format("%a");
-            $currentDay = (new DateTime())->diff($dayInit)->format("%a");
-            $dayStr = "Día $currentDay/$totalDays";
-        }
 
         /* Estado servicio */
         $estado = $servicio->getIdServicioEstado();
@@ -173,42 +162,54 @@ class ServicesController extends AbstractController
         }
 
 
-        /* Personal del servicio */
+        /* PAX y fechas */
         $em = $this->getDoctrine()->getManager();
         $connection = $em->getConnection();
-        $statement = $connection->prepare("SELECT u.* FROM rel_servicio_usuario rsu JOIN usuario u ON u.id=rsu.id_usuario WHERE rsu.id_servicio = :id");
+        $statement = $connection->prepare("select count(1) as pax , min(fecha) as fecha_inicio, max(fecha) as fecha_fin
+from servicio_categoria
+where id_servicio = :id and id_persona > 0 and id_persona_servicio_estado < 9 and separador = 0 and borrado = 0
+group by id_servicio");
         $statement->bindValue('id', $servicio->getId());
         $statement->execute();
-        $results = $statement->fetchAll();
+        $result = $statement->fetch();
 
-        $eventoStr = "Sin evento asignado";
-        if (count($results) > 0) {
-            $eventoStr = $results[0]['numero'];
+        /* Calculate day */
+        $dayInit = new \DateTime($result['fecha_inicio']);
+        $dayEnd = new \Datetime($result['fecha_fin']);
+        $dayStr = "Días no acordados";
+        if ($dayInit != null && $dayEnd != null) {
+            $totalDays = $dayEnd->diff($dayInit)->format("%a");
+            $currentDay = (new \DateTime())->diff($dayInit)->format("%a");
+
+            if ($currentDay > $totalDays) {
+                $dayStr = "Servicio finalizado";
+            } else if ($currentDay == 0 && $totalDays == 0) {
+                $dayStr = "Servicio sin fechas";
+            } else {
+                $dayStr = "Día $currentDay/$totalDays";
+            }
+        }
+
+        if ($dayInit->format("d/m/Y H:m") == $dayEnd->format("d/m/Y H:m")) {
+            $horarioStr = "Día único: " . $dayEnd->format("d/m/Y");
+        } else {
+            $horarioStr = "Desde " . $dayInit->format("d/m/Y H:m") . " hasta " . $dayEnd->format("d/m/Y H:m");
         }
 
 
         $servicioDepurado = array(
             'codigo' => $servicio->getNumero(),
-            1 => $this->getDoctrine()->getManager()->
-            createQueryBuilder()->select('s')->
-            from('App:Empresa', 's')
-                ->where('s.id = :id')
-                ->setParameter('id', $servicio->getIdEmpresa())->getQuery()->getSingleResult()->getNombre(),
-            2 => $servicio->getNombre(),
-            3 => $deleStr,
-            4 => $dptoStr,
-            5 => $estadoStr,
-            6 => "TODO_PAX",
             'fecha' => $dayStr,
-            8 => $servicio->getId(),
             'presupuesto' => $presupuestoKey,
             'evento' => $eventoStr,
             'estado' => $estadoStr,
+            'horario' => $horarioStr
         );
 
 
         return $this->render('services/single.html.twig', [
             'servicio' => $servicioDepurado,
+            'serviceId' => $id,
             'currentUser' => $userService->getSessionUser()->getNombreCompleto(),
         ]);
     }
@@ -216,7 +217,7 @@ class ServicesController extends AbstractController
     /**
      * @Route("/services_fetch_table", name="servicefetcher")
      */
-    public function serviciofetcher(UserService $userService, ServicesService $serviceData)
+    public function serviciofetcher(UserService $userService)
     {
         if (!$userService->isLoggedIn()) {
             return $this->redirectToRoute('login');
@@ -348,9 +349,70 @@ group by id_servicio");
     }
 
 
-    private $em = null;
+    /**
+     * @Route("/services_fetch_workers_table/{serviceId}", name="serviceworkersfetcher")
+     */
+    public function serviciotrabajadorfetcher(UserService $userService, $serviceId)
+    {
+        if (!$userService->isLoggedIn()) {
+            return $this->redirectToRoute('login');
+        }
+        /* Personal del servicio */
+        $em = $this->getDoctrine()->getManager();
+        $connection = $em->getConnection();
+        $statement = $connection->prepare("select id_persona
+from servicio_categoria
+where id_servicio = :id and id_persona > 0 and id_persona_servicio_estado < 9 and separador = 0 and borrado = 0");
+        $statement->bindValue('id', $serviceId);
+        $statement->execute();
+        $result = $statement->fetchAll();
+        $trabajadores = [];
 
-    public function getServiceData($serviceId)
+        if (count($result) > 0) {
+            foreach ($result as $trabajador) {
+                $em = $this->getDoctrine()->getManager();
+                $connection = $em->getConnection();
+                $statement = $connection->prepare("SELECT * FROM persona WHERE id=:id");
+                $statement->bindValue('id', $trabajador['id_persona']);
+                $statement->execute();
+                $trabajadorDB = $statement->fetch();
+                if ($trabajadorDB !== false) {
+                    $trabajadores[] = array(
+                        0 => $trabajadorDB['dni'] == "" || $trabajadorDB['dni'] == null ? "Sin dni" : $trabajadorDB['dni'],
+                        1 => $trabajadorDB['nombre_completo'],
+                        2 => $trabajadorDB['email'] == "" || $trabajadorDB['email'] == null ? "Sin email" : $trabajadorDB['email'],
+                        3 => $trabajadorDB['sexo'] == 2 ? "Hombre" : "Mujer",
+                        4 => $trabajadorDB['extra1'],
+                    );
+                }
+            }
+        }
+
+        /* Conteo total trabajadores */
+        $em = $this->getDoctrine()->getManager();
+        $connection = $em->getConnection();
+        $statement = $connection->prepare("select count(id_persona) as counted
+from servicio_categoria
+where id_servicio = :id and id_persona > 0 and id_persona_servicio_estado < 9 and separador = 0 and borrado = 0");
+        $statement->bindValue('id', $serviceId);
+        $statement->execute();
+        $result = $statement->fetch();
+
+        return new JsonResponse(array(
+            "draw" => isset($_POST["draw"]) ? intval($_POST["draw"]) : 0,
+            "recordsTotal" => $result['counted'],
+            "recordsFiltered" => $result['counted'],
+            "data" => $trabajadores
+        ));
+
+    }
+
+
+    private
+        $em = null;
+
+    public
+    function getServiceData($serviceId)
     {
 
     }
